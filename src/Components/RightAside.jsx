@@ -9,7 +9,7 @@ const RightAside = () => {
     const fetchNews = async () => {
       const options = {
         method: 'GET',
-        url: 'https://newsapi.org/v2/everything',
+        url: 'https://web-production-6fc64.up.railway.app/newsapi.org/v2/everything',
         params: {
           language : 'en',
           source : 'bbc-sport, espn, football-italia, four-four-two, fox-sports, google-news, talksport, the-sport-bible, the-telegraph, the-times, the-verge, the-wall-street-journal, the-washington-post, time',
