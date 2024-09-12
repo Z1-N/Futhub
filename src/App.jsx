@@ -11,7 +11,11 @@ import Footer from "./Components/Footer";
 import DockedNavbar from "./Components/DockedNavbar";
 
 function App() {
-  const [selectedLeagueId, setSelectedLeagueId] = useState(null);
+  const [selectedLeague, setSelectedLeague] = useState('PL'); // Default to Premier League
+
+  const handleLeagueClick = (leagueId) => {
+    setSelectedLeague(leagueId);
+  };
   const location = useLocation();
 
   // Determine whether to hide the main grid layout or not (for example, hide on the News or Contact page)
@@ -33,10 +37,10 @@ function App() {
         {/* Render for medium and large screens */}
         {!isSpecialPage && (
           <div className="hidden md:grid grid-rows-[auto_1fr] grid-cols-[auto_1fr_auto] gap-4">
-            <LeftAside onLeagueClick={setSelectedLeagueId} />
+            <LeftAside  onLeagueClick={handleLeagueClick} />
             <div className="col-span-1">
               <Routes>
-                <Route path="/LeagueTable" element={<LeagueTable leagueId={selectedLeagueId} />} />
+                <Route path="/LeagueTable" element={<LeagueTable leagueId={selectedLeague} />} />
                 <Route path="/" element={<MainMatchResult />} />
               </Routes>
             </div>
@@ -49,7 +53,7 @@ function App() {
           <Routes>
             <Route path="/News" element={<News />} />
             <Route path="/Contact" element={<ContactUs />} />
-            <Route path="/LeagueTable" element={<LeagueTable leagueId={selectedLeagueId} />} />
+            <Route path="/LeagueTable" element={<LeagueTable leagueId={selectedLeague} />} />
             <Route path="/" element={<MainMatchResult />} />
           </Routes>
         </div>

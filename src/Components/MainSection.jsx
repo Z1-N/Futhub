@@ -129,70 +129,58 @@ const MainMatchResult = () => {
     };
   }, []);
 
-
   return (
     <div className="main-section p-4 bg-slate-800 rounded-lg min-h-screen">
-      <h1 className="text-3xl text-white text-center font-anton mb-6">Upcoming Match Schedule</h1>
+      <h1 className="text-2xl sm:text-3xl text-white text-center font-anton mb-4 sm:mb-6">Upcoming Match Schedule</h1>
       {loading ? (
         <>
           <div className="text-center text-gray-500">Fetching matches...</div>
-          <div className="bg-gray-700 animate-pulse my-6 h-12 rounded-md"></div>
-          <div className="bg-gray-700 animate-pulse my-6 h-12 rounded-md"></div>
-          <div className="bg-gray-700 animate-pulse my-6 h-12 rounded-md"></div>
-          <div className="bg-gray-700 animate-pulse my-6 h-12 rounded-md"></div>
-          <div className="bg-gray-700 animate-pulse my-6 h-12 rounded-md"></div>
-          <div className="bg-gray-700 animate-pulse my-6 h-12 rounded-md"></div>
-          <div className="bg-gray-700 animate-pulse my-6 h-12 rounded-md"></div>
-          <div className="bg-gray-700 animate-pulse my-6 h-12 rounded-md"></div>
-          <div className="bg-gray-700 animate-pulse my-6 h-12 rounded-md"></div>
+          {[...Array(9)].map((_, index) => (
+            <div key={index} className="bg-gray-700 animate-pulse my-2 sm:my-4 h-10 sm:h-12 rounded-md"></div>
+          ))}
         </>
       ) : Object.keys(leagueMatches).length > 0 ? (
         Object.keys(leagueMatches).map((league) => (
-          <div key={league} className="mb-8">
+          <div key={league} className="mb-6 sm:mb-8">
             <h2
-              className={`text-xl font-anton text-white p-1 rounded-md mb-4 bg-gradient-to-r ${leagueColors[league]}`}
+              className={`text-lg sm:text-xl font-anton text-white p-2 sm:p-4 rounded-md mb-2 sm:mb-4 bg-gradient-to-r ${leagueColors[league]}`}
             >
               <img
                 src={`https://crests.football-data.org/${leagues.find((l) => l.name === league).id}.png`}
                 alt={league}
-                className="w-12 px-1 inline-block h-12 mr-2"
+                className="w-10 h-10 sm:w-12 sm:h-12 px-1 inline-block mr-2"
               />
               {league}
             </h2>
 
-            <ul className="space-y-4">
+            <ul className="space-y-2 sm:space-y-4">
               {leagueMatches[league].map((match, index) => (
                 <motion.li
                   key={index}
-                  className={`p-6 rounded-lg shadow-md flex items-center justify-between bg-gradient-to-r ${leagueColors[league]}`}
+                  className={`p-4 sm:p-6 rounded-lg shadow-md flex flex-col sm:flex-row items-center justify-between bg-gradient-to-r ${leagueColors[league]}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                 >
-                  <div className="flex items-center font-anton space-x-4" style={{ flexBasis: '35%' }}>
-                    <img src={match.homeTeam.crest} alt={match.homeTeam.name} className="w-10 h-10" />
-                    <span className="text-lg text-white">{match.homeTeam.name}</span>
+                  <div className="flex items-center font-anton space-x-2 sm:space-x-4" style={{ flexBasis: '35%' }}>
+                    <img src={match.homeTeam.crest} alt={match.homeTeam.name} className="w-8 h-8 sm:w-10 sm:h-10" />
+                    <span className="text-sm sm:text-lg text-white">{match.homeTeam.name}</span>
                   </div>
-                  <div className="text-center" style={{ flexBasis: '30%' }}>
-                    <div className="text-sm font-roboto">
+                  <div className="text-center my-2 sm:my-0" style={{ flexBasis: '30%' }}>
+                    <div className="text-xs sm:text-sm font-roboto">
                       {match.status === 'LIVE' ? (
-                        <>
-                          <div className="flex items-center font-roboto space-x-2">
-                            <div className="relative w-3 h-3">
-                              <div className="absolute inline-flex w-full h-full bg-red-500 rounded-full opacity-75 animate-ping"></div>
-                              <div className="relative inline-flex w-3 h-3 bg-red-600 rounded-full"></div>
-                            </div>
-                            <span className="text-red-600 font-semibold">Live</span>
+                        <div className="flex items-center font-roboto space-x-2">
+                          <div className="relative w-3 h-3">
+                            <div className="absolute inline-flex w-full h-full bg-red-500 rounded-full opacity-75 animate-ping"></div>
+                            <div className="relative inline-flex w-3 h-3 bg-red-600 rounded-full"></div>
                           </div>
+                          <span className="text-red-600 font-semibold">Live</span>
                           {match.score.fullTime.home} - {match.score.fullTime.away}
-                        </>
+                        </div>
                       ) : match.status === 'FINISHED' ? (
-                        <>
-                          <span className="text-green-500 font-roboto">FT</span>
-                          {match.score.fullTime.home} - {match.score.fullTime.away}
-                        </>
+                        <span className="text-green-500 font-roboto">FT {match.score.fullTime.home} - {match.score.fullTime.away}</span>
                       ) : (
-                        <div className="bg-white/30 backdrop-blur-md backdrop-filter font-anton text-sm mx-8 px-6 py-0.5 rounded-xl">
+                        <div className="bg-white/30 backdrop-blur-md backdrop-filter font-anton text-xs sm:text-sm mx-4 sm:mx-8 px-4 sm:px-6 py-0.5 rounded-xl">
                           <span>
                             {new Date(match.utcDate).toLocaleDateString()}
                             <br />
@@ -202,9 +190,9 @@ const MainMatchResult = () => {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center font-anton justify-end space-x-4" style={{ flexBasis: '35%' }}>
-                    <span className="text-lg text-white">{match.awayTeam.name}</span>
-                    <img src={match.awayTeam.crest} alt={match.awayTeam.name} className="w-10 h-10" />
+                  <div className="flex items-center font-anton justify-end space-x-2 sm:space-x-4" style={{ flexBasis: '35%' }}>
+                    <span className="text-sm sm:text-lg text-white">{match.awayTeam.name}</span>
+                    <img src={match.awayTeam.crest} alt={match.awayTeam.name} className="w-8 h-8 sm:w-10 sm:h-10" />
                   </div>
                 </motion.li>
               ))}
@@ -219,4 +207,3 @@ const MainMatchResult = () => {
 };
 
 export default MainMatchResult;
-
