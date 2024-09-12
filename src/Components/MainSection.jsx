@@ -20,7 +20,7 @@ const leagues = [
   { id: 'FL1', name: 'Ligue 1' },
   { id: 'CL', name: 'Champions League' },
 ];
-const baseURL = 'https://api.football-data.org/v4/competitions';
+const baseURL = 'https://web-production-6fc64.up.railway.app/api.football-data.org/v4/competitions';
 
 const MainMatchResult = () => {
   const [leagueMatches, setLeagueMatches] = useState({});
