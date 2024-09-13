@@ -6,7 +6,12 @@ import axios from 'axios';
 const fetchSportsNews = async () => {
   const options = {
     method: 'GET',
+    origin : true ,  
     url: 'https://web-production-6fc64.up.railway.app/newsapi.org/v2/everything',
+    headers: {
+      'Upgrade-Insecure-Requests': '1', // Ensures the server knows you're using HTTPS
+      'Accept': 'application/json'
+    },
     params: {
       language: 'en',
       sources: 'bbc-sport, espn, football-italia, four-four-two, fox-sports, google-news, talksport, the-sport-bible, the-telegraph, the-times, the-verge, the-wall-street-journal, the-washington-post, time',
@@ -31,7 +36,7 @@ const fetchSportsNews = async () => {
   return articlesWithImages;
 };
 
-const SportsNews = () => {
+const News = () => {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -53,7 +58,7 @@ const SportsNews = () => {
   return (
     <div style={{
       background:
-        "linear-gradient(109.6deg, rgb(36, 45, 57) 11.2%, rgb(16, 37, 60) 51.2%, rgb(0, 0, 0) 98.6%)",
+        "transparent",
     }} className="min-h-screen bg-gray-100 p-4 flex flex-col items-center">
       <h1 className="text-4xl font-bold mb-8 text-white">Latest Sports News</h1>
       <div className="flex flex-wrap justify-center gap-6">
@@ -93,4 +98,4 @@ const SportsNews = () => {
   );
 };
 
-export default SportsNews;
+export default News;

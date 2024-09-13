@@ -51,7 +51,7 @@ function App() {
         {/* Render for small screens */}
         <div className="md:hidden">
           <Routes>
-            <Route path="/News" element={<News />} />
+            <Route path="/News" element={<News/>} />
             <Route path="/Contact" element={<ContactUs />} />
             <Route path="/LeagueTable" element={<LeagueTable leagueId={selectedLeague} />} />
             <Route path="/" element={<MainMatchResult />} />
