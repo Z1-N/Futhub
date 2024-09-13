@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import axios from "axios";
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import axios from 'axios';
 
 const News = () => {
   const [news, setNews] = useState([]);
@@ -10,28 +10,24 @@ const News = () => {
     const fetchNews = async () => {
       const options = {
         method: 'GET',
-        url: 'https://web-production-6fc64.up.railway.app/newsapi.org/v2/everything',
+        url: 'https://api.currentsapi.services/v1/latest-news',
         params: {
+          category : 'sports',
           language: 'en',
-          sources: 'bbc-sport, espn, football-italia, four-four-two, fox-sports, google-news, talksport, the-sport-bible, the-telegraph, the-times, the-verge, the-wall-street-journal, the-washington-post, time',
-          q: 'Premier League OR La Liga OR Bundesliga OR Serie A OR Ligue 1 OR Champions League OR Europa League OR UEFA OR FIFA OR Transfer News OR Player Transfers OR Football Players OR Football Matches OR Football Results OR Football Highlights OR Football News OR Football Rumors OR Football Injuries OR Football Managers OR Football Clubs',
-          sortBy: 'publishedAt',
-          apiKey: 'c82f6250f42f4f92b0518dfd6f60f235'
+          keywords: 'soccer, Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Champions League, Europa League, UEFA, FIFA, Transfer News, Player Transfers, Football Players, Football Matches, Football Results, Football Highlights, Football News, Football Rumors, Football Injuries, Football Managers, Football Clubs',
+          apiKey: '3DMRmLiB2jUVat5OJ_iKOxnXxYmzxYh8t4NSQ_TeApYHX9_4' // Replace with your actual API key
         }
       };
 
       try {
         const response = await axios.request(options);
-        const today = new Date();
-        const threeDaysAgo = new Date(today);
-        threeDaysAgo.setDate(today.getDate() - 2);
 
-        const articlesWithImages = response.data.articles
+        const articlesWithImages = response.data.news
           .filter(article => {
             
-            return article.urlToImage
+            return article.image 
           })
-          .slice(0, 103);
+          .slice(0, 104); // Limit to 10 articles
 
         setNews(articlesWithImages);
         setLoading(false);
@@ -59,9 +55,9 @@ const News = () => {
               whileTap={{ scale: 0.98 }}
             >
               <a href={article.url} target="_blank" rel="noopener noreferrer" className="block">
-                {article.urlToImage && (
+                {article.image && (
                   <img
-                    src={article.urlToImage}
+                    src={article.image}
                     alt={article.title}
                     className="w-full h-48 object-cover"
                   />

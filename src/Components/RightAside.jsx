@@ -9,13 +9,13 @@ const RightAside = () => {
     const fetchNews = async () => {
       const options = {
         method: 'GET',
-        url: 'https://web-production-6fc64.up.railway.app/newsapi.org/v2/everything',
+        url: 'https://api.currentsapi.services/v1/latest-news',
         params: {
-          language : 'en',
-          source : 'bbc-sport, espn, football-italia, four-four-two, fox-sports, google-news, talksport, the-sport-bible, the-telegraph, the-times, the-verge, the-wall-street-journal, the-washington-post, time',
-          q: 'Premier League OR La Liga OR Bundesliga OR Serie A OR Ligue 1 OR Champions League OR Europa League OR UEFA OR FIFA OR Transfer News OR Player Transfers OR Football Players OR Football Matches OR Football Results OR Football Highlights OR Football News OR Football Rumors OR Football Injuries OR Football Managers OR Football Clubs', // Search for football news          language: 'en', // Filter for English articles
-          sortBy: 'publishedAt', // Sort by news
-          apiKey: 'c82f6250f42f4f92b0518dfd6f60f235' // Replace with your actual API key
+          category : 'sports',
+          author : 'bbc-sport, espn, football-italia, four-four-two, fox-sports, google-news, talksport, the-sport-bible, the-telegraph, the-times, the-verge, the-wall-street-journal, the-washington-post, time',
+          language: 'en',
+          keywords: 'soccer, football, Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Champions League, Europa League, UEFA, FIFA, Transfer News, Player Transfers, Football Players, Football Matches, Football Results, Football Highlights, Football News, Football Rumors, Football Injuries, Football Managers, Football Clubs',
+          apiKey: '3DMRmLiB2jUVat5OJ_iKOxnXxYmzxYh8t4NSQ_TeApYHX9_4' // Replace with your actual API key
         }
       };
 
@@ -25,12 +25,12 @@ const RightAside = () => {
         const threeDaysAgo = new Date(today);
         threeDaysAgo.setDate(today.getDate() - 2); // Get the date 3 days ago
 
-        const articlesWithImages = response.data.articles
+        const articlesWithImages = response.data.news
           .filter(article => {
-            const articleDate = new Date(article.publishedAt);
-            return article.urlToImage && articleDate >= threeDaysAgo && articleDate <= today;
+            const articleDate = new Date(article.published);
+            return article.image && articleDate >= threeDaysAgo && articleDate <= today;
           }) // Filter for articles with images published in the past 3 days
-          .slice(0, 10); // Limit to 4 articles
+          .slice(0, 10); // Limit to 10 articles
         setNews(articlesWithImages);
       } catch (error) {
         console.error('Error fetching news:', error.message);
@@ -52,8 +52,8 @@ const RightAside = () => {
             whileTap={{ scale: 0.95 }}
           >
             <a href={article.url} target="_blank" rel="noopener noreferrer" className="block">
-              {article.urlToImage && (
-                <img src={article.urlToImage} alt={article.title} className="w-full h-32 object-cover rounded-lg mb-2" />
+              {article.image && (
+                <img src={article.image} alt={article.title} className="w-full h-32 object-cover rounded-lg mb-2" />
               )}
               <h3 className="text-lg font-semibold">{article.title}</h3>
               <p className="text-sm font-roboto text-gray-400">
