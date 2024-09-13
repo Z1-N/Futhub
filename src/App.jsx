@@ -16,9 +16,10 @@ function App() {
   const handleLeagueClick = (leagueId) => {
     setSelectedLeague(leagueId);
   };
+  
   const location = useLocation();
-
-  // Determine whether to hide the main grid layout or not (for example, hide on the News or Contact page)
+  
+  // Determine whether to hide the main grid layout or not
   const isSpecialPage = location.pathname === '/News' || location.pathname === '/Contact';
 
   return (
@@ -31,27 +32,37 @@ function App() {
     >
       {/* Navbar for larger screens */}
       <Navbar />
-
+      
       {/* Main Content */}
       <div className="flex-grow">
-        {/* Render for medium and large screens */}
-        {!isSpecialPage && (
-          <div className="hidden md:grid grid-rows-[auto_1fr] grid-cols-[auto_1fr_auto] gap-4">
-            <LeftAside  onLeagueClick={handleLeagueClick} />
+        {/* Render for larger screens */}
+        <div className={`hidden md:grid ${isSpecialPage ? 'grid-cols-1' : 'grid-rows-[auto_1fr] grid-cols-[auto_1fr_auto]'} gap-4`}>
+          {!isSpecialPage && (
+            <>
+              <LeftAside onLeagueClick={handleLeagueClick} />
+              <div className="col-span-1">
+                <Routes>
+                  <Route path="/LeagueTable" element={<LeagueTable leagueId={selectedLeague} />} />
+                  <Route path="/" element={<MainMatchResult />} />
+                </Routes>
+              </div>
+              <RightAside />
+            </>
+          )}
+          {isSpecialPage && (
             <div className="col-span-1">
               <Routes>
-                <Route path="/LeagueTable" element={<LeagueTable leagueId={selectedLeague} />} />
-                <Route path="/" element={<MainMatchResult />} />
+                <Route path="/News" element={<News />} />
+                <Route path="/Contact" element={<ContactUs />} />
               </Routes>
             </div>
-            <RightAside />
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Render for small screens */}
         <div className="md:hidden">
           <Routes>
-            <Route path="/News" element={<News/>} />
+            <Route path="/News" element={<News />} />
             <Route path="/Contact" element={<ContactUs />} />
             <Route path="/LeagueTable" element={<LeagueTable leagueId={selectedLeague} />} />
             <Route path="/" element={<MainMatchResult />} />
