@@ -9,8 +9,10 @@ const fetchSportsNews = async () => {
     origin : true ,  
     url: 'https://web-production-6fc64.up.railway.app/newsapi.org/v2/everything',
     headers: {
-      'Upgrade-Insecure-Requests': '1', // Ensures the server knows you're using HTTPS
-      'Accept': 'application/json'
+      'Upgrade': 'HTTP/2.0',  // Request to upgrade to HTTP/2.0
+      'Connection': 'Upgrade' ,
+      'Origin': 'https://futhub.vercel.app', // Specify the domain of your app
+      'X-Requested-With': 'XMLHttpRequest'  // Commonly used to denote AJAX requests
     },
     params: {
       language: 'en',
