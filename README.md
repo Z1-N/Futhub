@@ -77,7 +77,7 @@ npm run preview – Serves the production build locally
 npm run lint – Lints source code using ESLint
 ```
 
-## Known Issues ⚠️ 
+## Known Issues 
 
 The project currently uses a free third-party API, which may be rate-limited, unstable, or return inconsistent data. This could affect loading times, data rendering, or certain features depending on the API's response reliability.
 
