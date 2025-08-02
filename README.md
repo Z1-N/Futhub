@@ -79,7 +79,7 @@ npm run lint – Lints source code using ESLint
 ```
 
 Project Structure
-
+```bash
 Futhub/
 ├── public/                # Static assets
 ├── src/
@@ -95,3 +95,4 @@ Futhub/
 ├── eslint.config.js
 ├── vite.config.js
 └── README.md
+```
