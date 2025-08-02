@@ -9,7 +9,7 @@ const RightAside = () => {
     const fetchNews = async () => {
       const options = {
         method: 'GET',
-        url: 'https://api.currentsapi.services/v1/latest-news',
+        url: 'https://cors-anywhere.herokuapp.com/https://api.currentsapi.services/v1/latest-news',
         params: {
           category : 'sports',
           author : 'bbc-sport, espn, football-italia, four-four-two, fox-sports, google-news, talksport, the-sport-bible, the-telegraph, the-times, the-verge, the-wall-street-journal, the-washington-post, time',
