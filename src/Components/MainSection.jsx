@@ -20,7 +20,7 @@ const leagues = [
   { id: 'FL1', name: 'Ligue 1' },
   { id: 'CL', name: 'Champions League' },
 ];
-const baseURL = 'https://proxy.cors.sh/https:/api.football-data.org/v4/competitions';
+const baseURL = 'https:/api.football-data.org/v4/competitions';
 
 const MainMatchResult = () => {
   const [leagueMatches, setLeagueMatches] = useState({});
@@ -54,7 +54,11 @@ const MainMatchResult = () => {
       method: 'GET',
       url: `${baseURL}/${league.id}/matches`,
       headers: {
-        'X-Auth-Token': apiKey,
+      'X-Auth-Token': apiKey,
+      'Access-Control-Allow-Origin': 'https:/api.football-data.org/v4/*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Credentials': 'true'
       },
       params: {
         status: 'FINISHED,LIVE,SCHEDULED',
