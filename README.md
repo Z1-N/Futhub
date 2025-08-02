@@ -21,7 +21,7 @@ A React application scaffolded with Vite — using Tailwind CSS and ESLint — i
 
 ## About
 
-This project was initialized using Vite with the React template. It includes ESLint, Tailwind CSS, and basic configuration files (e.g., `vite.config.js`, `tailwind.config.js`, `eslint.config.js`). It currently operates as a starter template and awaits your specific features, pages, and design for **Futhub**.
+This project was initialized using Vite with the React template. It includes ESLint, Tailwind CSS, and basic configuration files (e.g., `vite.config.js`, `tailwind.config.js`, `eslint.config.js`). It currently operates as a starter template and awaits your specific features, pages, and design for **Futhub** a football website for schedule  news , and match results for football fans.
 
 ---
 
