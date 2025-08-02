@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 
 const apiKey = '458f5babb2934ba9afab0d467264ff3a';
-const baseURL = 'https://gorgeous-speculoos-b03657.netlify.app/https:/api.football-data.org/v4/competitions';
+const baseURL = 'https://proxy.cors.sh/https:/api.football-data.org/v4/competitions';
 
 const leagueColors = {
   'PL': 'from-purple-600 to-indigo-600',

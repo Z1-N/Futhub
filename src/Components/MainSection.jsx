@@ -20,7 +20,7 @@ const leagues = [
   { id: 'FL1', name: 'Ligue 1' },
   { id: 'CL', name: 'Champions League' },
 ];
-const baseURL = 'https://gorgeous-speculoos-b03657.netlify.app/https:/api.football-data.org/v4/competitions';
+const baseURL = 'https://proxy.cors.sh/https:/api.football-data.org/v4/competitions';
 
 const MainMatchResult = () => {
   const [leagueMatches, setLeagueMatches] = useState({});
