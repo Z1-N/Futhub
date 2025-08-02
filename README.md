@@ -12,11 +12,10 @@ A React application scaffolded with Vite — using Tailwind CSS and ESLint — i
 - [Installation](#installation)  
 - [Running the Development Server](#running-the-development-server)  
 - [Building for Production](#building-for-production)  
-- [Available Scripts](#available-scripts)  
+- [Available Scripts](#available-scripts)
+- [Known Issues](#known-issues)   
 - [Project Structure](#project-structure)  
-- [Customize & Extend](#customize--extend)  
-- [Contributing](#contributing)  
-- [License](#license)
+
 
 ---
 
@@ -67,7 +66,7 @@ Outputs the optimized build into the dist/ folder. To preview it locally:
 ```bash
 npm run preview
 ```
-Available Scripts
+##Available Scripts
 ```bash
 npm run dev – Starts the development server
 
@@ -78,7 +77,7 @@ npm run preview – Serves the production build locally
 npm run lint – Lints source code using ESLint
 ```
 
-Known Issues⚠️ 
+##Known Issues⚠️ 
 
 The project currently uses a free third-party API, which may be rate-limited, unstable, or return inconsistent data. This could affect loading times, data rendering, or certain features depending on the API's response reliability.
 
@@ -86,7 +85,7 @@ Consider replacing the free API with a more stable or self-hosted alternative fo
 
 
 
-Project Structure
+##Project Structure
 ```bash
 Futhub/
 ├── public/                # Static assets
