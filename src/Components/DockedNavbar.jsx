@@ -23,31 +23,35 @@ const DockedNavbar = () => {
     };
   }, [lastScrollY]);
 
-  const linkClass = (path) => 
-    `flex flex-col items-center ${location.pathname === path ? 'text-yellow-400' : 'text-white'}`;
+  const linkClass = (path) => {
+    const active = location.pathname === path;
+    const base = 'flex flex-col items-center';
+    const color = active ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-900 dark:text-white';
+    return `${base} ${color}`;
+  };
 
   return (
     <nav
-      className={`fixed bottom-0 left-0 right-0 bg-indigo-600 text-white flex justify-around items-center p-4 transition-transform duration-300 ${
+      className={`fixed bottom-0 left-0 right-0 border-t border-white/10 bg-white/80 dark:bg-gray-900/70 backdrop-blur text-gray-900 dark:text-white flex justify-around items-center p-2.5 pb-[max(0.6rem,env(safe-area-inset-bottom))] transition-transform duration-300 ${
         isVisible ? 'translate-y-0' : 'translate-y-full'
       } md:hidden`}
       aria-label="Navigation"
     >
       <Link to="/News" className={linkClass("/News")}>
         <FaNewspaper size={28} />
-        <span className="text-sm">News</span>
+        <span className="text-xs">News</span>
       </Link>
       <Link to="/Contact" className={linkClass("/Contact")}>
         <FaEnvelope size={28} />
-        <span className="text-sm">Contact Us</span>
+        <span className="text-xs">Contact</span>
       </Link>
       <Link to="/LeagueTable" className={linkClass("/LeagueTable")}>
         <FaTable size={28} />
-        <span className="text-sm">League Tables</span>
+        <span className="text-xs">Table</span>
       </Link>
       <Link to="/" className={linkClass("/")}>
         <FaFutbol size={28} />
-        <span className="text-sm">Matches</span>
+        <span className="text-xs">Matches</span>
       </Link>
     </nav>
   );

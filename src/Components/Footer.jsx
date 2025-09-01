@@ -7,25 +7,27 @@ const Footer = () => {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
-      className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white py-2 md:py-5
-                 w-full md:static md:bottom-auto mt-40  bottom-0 left-0"
+  className="border-t border-white/10 bg-white/80 dark:bg-gray-900/70 backdrop-blur text-gray-900 dark:text-white py-3 md:py-6 w-full md:static md:bottom-auto mt-24 md:mt-40 bottom-0 left-0"
     >
       <div className="container  mx-auto px-4">
         {/* Logo and Description */}
         <div className="flex  flex-row justify-between items-center text-center md:text-left">
-          <div className="mb-4 md:mb-0">
-            <h2 className="text-base md:text-2xl font-bold">FutHub</h2>
-            <p className="text-xs md:text-sm mt-1">Your ultimate football hub</p>
+          <div className="mb-4 md:mb-0 flex items-center gap-2">
+            <img src="/favicon.svg" alt="FutHub" className="w-6 h-6 md:w-7 md:h-7" />
+            <div>
+              <h2 className="text-base md:text-2xl font-bold">FutHub</h2>
+              <p className="text-xs md:text-sm mt-1 text-gray-600 dark:text-gray-300">Your ultimate football hub</p>
+            </div>
           </div>
           {/* Navigation Links */}
           <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-6 mt-2 md:mt-0">
-            <a href="#" className="text-xs md:text-sm hover:text-gray-400 transition duration-300">
+            <a href="#" className="text-xs md:text-sm hover:text-gray-700 dark:hover:text-gray-300 transition duration-300">
               Home
             </a>
-            <a href="#" className="text-xs md:text-sm hover:text-gray-400 transition duration-300">
+            <a href="#" className="text-xs md:text-sm hover:text-gray-700 dark:hover:text-gray-300 transition duration-300">
               About
             </a>
-            <a href="#" className="text-xs md:text-sm hover:text-gray-400 transition duration-300">
+            <a href="#" className="text-xs md:text-sm hover:text-gray-700 dark:hover:text-gray-300 transition duration-300">
               Contact
             </a>
           </div>
@@ -69,16 +71,16 @@ const Footer = () => {
 
         {/* Contact Information */}
         <div className="mt-4 text-center">
-          <p className="text-xs md:text-sm text-gray-400">
+          <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
             123 Football St, Soccer City, SC 12345
           </p>
-          <p className="text-xs md:text-sm text-gray-400">
+          <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
             Email: contact@futhub.com | Phone: (123) 456-7890
           </p>
         </div>
 
         {/* Copyright */}
-        <div className="mt-2 text-center text-gray-400 text-xs md:text-sm">
+        <div className="mt-2 text-center text-gray-600 dark:text-gray-400 text-xs md:text-sm">
           &copy; {new Date().getFullYear()} FutHub. All rights reserved.
         </div>
       </div>

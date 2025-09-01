@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
-const apiKey = '458f5babb2934ba9afab0d467264ff3a';
+// API key is now injected server-side via proxy; do not store it here.
 const leagueColors = {
   'Premier League': 'from-purple-600 to-indigo-600',
   'Bundesliga': 'from-red-600 to-yellow-500',
@@ -13,14 +15,14 @@ const leagueColors = {
 };
 
 const leagues = [
-  { id: 'PL', name: 'Premier League' },
-  { id: 'BL1', name: 'Bundesliga' },
-  { id: 'SA', name: 'Serie A' },
-  { id: 'PD', name: 'La Liga' },
-  { id: 'FL1', name: 'Ligue 1' },
-  { id: 'CL', name: 'Champions League' },
+  { code: 'eng.1', name: 'Premier League', crestId: 'PL' },
+  { code: 'ger.1', name: 'Bundesliga', crestId: 'BL1' },
+  { code: 'ita.1', name: 'Serie A', crestId: 'SA' },
+  { code: 'esp.1', name: 'La Liga', crestId: 'PD' },
+  { code: 'fra.1', name: 'Ligue 1', crestId: 'FL1' },
 ];
-const baseURL = 'https://corsproxy.io/?url=https:/api.football-data.org/v4/competitions';
+// ESPN proxy base
+const espnBase = '/api/espn/soccer';
 
 const MainMatchResult = () => {
   const [leagueMatches, setLeagueMatches] = useState({});
@@ -50,38 +52,40 @@ const MainMatchResult = () => {
   };
 
   const fetchLeagueMatches = async (league, isMounted) => {
-    const options = {
-      method: 'GET',
-      url: `${baseURL}/${league.id}/matches`,
-      headers: {
-      'X-Auth-Token': apiKey,
-      'Access-Control-Allow-Origin': 'https:/api.football-data.org/v4/*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Credentials': 'true'
-      },
-      params: {
-        status: 'FINISHED,LIVE,SCHEDULED',
-      },
-    };
+    // ESPN scoreboard provides events with competitors and status
+    const url = `${espnBase}/${league.code}/scoreboard`;
+    const options = { method: 'GET', url };
 
     try {
       const data = await fetchMatchesWithRetry(options);
-      console.log(`Fetched matches for ${league.name}:`, data.matches);
+      const events = data?.events || [];
 
-      const leagueMatchday = data.matches.length > 0 ? data.matches[0].season.currentMatchday : null;
-      const twoDaysAgo = new Date();
-      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-
-      const filteredMatches = data.matches.filter((match) => {
-        const matchDate = new Date(match.utcDate);
-        return (
-          match.homeTeam.name &&
-          match.awayTeam.name &&
-          ((match.status === 'FINISHED' && matchDate >= twoDaysAgo) ||
-            match.status === 'LIVE' ||
-            (['TIMED', 'SCHEDULED'].includes(match.status) && match.matchday === leagueMatchday))
-        );
+  const filteredMatches = events.map((ev) => {
+        const [home, away] = ev.competitions?.[0]?.competitors?.sort((a,b)=> (a.homeAway === 'home' ? -1 : 1)) || [];
+        const statusType = ev.status?.type?.state; // 'pre','in','post'
+        const statusDetail = ev.status?.type?.shortDetail || '';
+        return {
+          id: ev.id,
+          utcDate: ev.date,
+          status: statusType === 'in' ? 'LIVE' : statusType === 'post' ? 'FINISHED' : 'SCHEDULED',
+          score: {
+            fullTime: {
+              home: Number(home?.score ?? 0),
+              away: Number(away?.score ?? 0),
+            },
+          },
+          homeTeam: {
+    name: home?.team?.displayName || home?.team?.name,
+    short: home?.team?.shortDisplayName || home?.team?.abbreviation || home?.team?.displayName || home?.team?.name,
+            crest: home?.team?.logo || '',
+          },
+          awayTeam: {
+    name: away?.team?.displayName || away?.team?.name,
+    short: away?.team?.shortDisplayName || away?.team?.abbreviation || away?.team?.displayName || away?.team?.name,
+            crest: away?.team?.logo || '',
+          },
+          statusDetail,
+        };
       });
 
       if (isMounted) {
@@ -134,23 +138,46 @@ const MainMatchResult = () => {
   }, []);
 
   return (
-    <div className="main-section p-4 bg-slate-800 rounded-lg min-h-screen">
-      <h1 className="text-2xl sm:text-3xl text-white text-center font-anton mb-4 sm:mb-6">Upcoming Match Schedule</h1>
+    <div className="main-section p-3 sm:p-4 rounded-lg min-h-screen">
+      <h1 className="text-2xl sm:text-3xl text-gray-900 dark:text-white text-center font-anton mb-4 sm:mb-6">Latest Matches</h1>
       {loading ? (
         <>
           <div className="text-center text-gray-500">Fetching matches...</div>
-          {[...Array(9)].map((_, index) => (
-            <div key={index} className="bg-gray-700 animate-pulse my-2 sm:my-4 h-10 sm:h-12 rounded-md"></div>
-          ))}
+          <ul className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
+            {[...Array(6)].map((_, index) => (
+              <li key={index} className="p-4 sm:p-6 rounded-2xl border border-white/10 bg-white/70 dark:bg-gray-900/60 backdrop-blur shadow-sm">
+                <div className="grid grid-cols-3 items-center gap-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Skeleton circle width={32} height={32} />
+                    <div className="flex-1 min-w-0">
+                      <Skeleton height={14} width={120} />
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-center justify-center">
+                    <Skeleton height={28} width={80} />
+                    <div className="mt-1">
+                      <Skeleton height={10} width={90} />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-end gap-2 min-w-0">
+                    <div className="flex-1 min-w-0 text-right">
+                      <Skeleton height={14} width={120} />
+                    </div>
+                    <Skeleton circle width={32} height={32} />
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
         </>
       ) : Object.keys(leagueMatches).length > 0 ? (
         Object.keys(leagueMatches).map((league) => (
-          <div key={league} className="mb-6 sm:mb-8">
+          <div key={league} className="mb-5 sm:mb-8">
             <h2
               className={`text-lg sm:text-xl font-anton text-white p-2 sm:p-4 rounded-md mb-2 sm:mb-4 bg-gradient-to-r ${leagueColors[league]}`}
             >
               <img
-                src={`https://crests.football-data.org/${leagues.find((l) => l.name === league).id}.png`}
+                src={`https://crests.football-data.org/${leagues.find((l) => l.name === league)?.crestId}.png`}
                 alt={league}
                 className="w-10 h-10 sm:w-12 sm:h-12 px-1 inline-block mr-2"
               />
@@ -161,42 +188,80 @@ const MainMatchResult = () => {
               {leagueMatches[league].map((match, index) => (
                 <motion.li
                   key={index}
-                  className={`p-4 sm:p-6 rounded-lg shadow-md flex flex-col sm:flex-row items-center justify-between bg-gradient-to-r ${leagueColors[league]}`}
+                  className={`p-4 sm:p-6 rounded-2xl border border-white/10 bg-white/70 dark:bg-gray-900/60 backdrop-blur shadow-sm`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                 >
-                  <div className="flex items-center font-anton space-x-2 sm:space-x-4" style={{ flexBasis: '35%' }}>
-                    <img src={match.homeTeam.crest} alt={match.homeTeam.name} className="w-8 h-8 sm:w-10 sm:h-10" />
-                    <span className="text-sm sm:text-lg text-white">{match.homeTeam.name}</span>
-                  </div>
-                  <div className="text-center my-2 sm:my-0" style={{ flexBasis: '30%' }}>
-                    <div className="text-xs sm:text-sm font-roboto">
-                      {match.status === 'LIVE' ? (
-                        <div className="flex items-center font-roboto space-x-2">
-                          <div className="relative w-3 h-3">
-                            <div className="absolute inline-flex w-full h-full bg-red-500 rounded-full opacity-75 animate-ping"></div>
-                            <div className="relative inline-flex w-3 h-3 bg-red-600 rounded-full"></div>
-                          </div>
-                          <span className="text-red-600 font-semibold">Live</span>
-                          {match.score.fullTime.home} - {match.score.fullTime.away}
+                  <div className="grid grid-cols-3 items-center gap-3">
+                    {/* Home */}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="inline-flex items-center justify-center rounded-lg ring-1 ring-black/10 dark:ring-white/10 overflow-hidden bg-transparent">
+                        {match.homeTeam.crest && (
+                          <img src={match.homeTeam.crest} alt={match.homeTeam.name} className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
+                        )}
+                      </span>
+                      <span className="font-anton text-sm sm:text-base text-gray-900 dark:text-white truncate" title={match.homeTeam.name}>
+                        <span className="sm:hidden">{match.homeTeam.short || match.homeTeam.name}</span>
+                        <span className="hidden sm:inline">{match.homeTeam.name}</span>
+                      </span>
+                    </div>
+
+                    {/* Center score pill */}
+                    <div className="flex flex-col items-center justify-center">
+                      {match.status === 'LIVE' && (
+                        <div className="mb-1 inline-flex items-center gap-1 text-red-600 font-semibold text-[11px] sm:text-xs">
+                          <span className="relative inline-flex">
+                            <span className="absolute inline-flex w-2.5 h-2.5 bg-red-500 rounded-full opacity-75 animate-ping"></span>
+                            <span className="relative inline-flex w-2.5 h-2.5 bg-red-600 rounded-full"></span>
+                          </span>
+                          LIVE
+                          <span className="text-gray-500 dark:text-gray-400 font-roboto">{match.statusDetail}</span>
                         </div>
-                      ) : match.status === 'FINISHED' ? (
-                        <span className="text-green-500 font-roboto">FT {match.score.fullTime.home} - {match.score.fullTime.away}</span>
-                      ) : (
-                        <div className="bg-white/30 backdrop-blur-md backdrop-filter font-anton text-xs sm:text-sm mx-4 sm:mx-8 px-4 sm:px-6 py-0.5 rounded-xl">
-                          <span>
-                            {new Date(match.utcDate).toLocaleDateString()}
-                            <br />
+                      )}
+                      {match.status === 'FINISHED' && (
+                        <div className="mb-1 inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px] sm:text-xs">FT</div>
+                      )}
+                      <div
+                        className={`inline-flex items-center gap-3 px-3 py-1.5 rounded-xl border text-sm sm:text-base font-anton ${
+                          match.status === 'LIVE'
+                            ? 'bg-red-500/10 border-red-500/40 text-red-700 dark:text-red-400'
+                            : match.status === 'FINISHED'
+                            ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-700 dark:text-emerald-300'
+                            : 'bg-gray-900/5 dark:bg-white/10 border-white/10 text-gray-900 dark:text-gray-100'
+                        }`}
+                      >
+                        {match.status === 'SCHEDULED' ? (
+                          <span className="font-roboto text-xs sm:text-sm text-gray-700 dark:text-gray-300">
                             {new Date(match.utcDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
+                        ) : (
+                          <>
+                            <span>{match.score.fullTime.home}</span>
+                            <span className="opacity-70">—</span>
+                            <span>{match.score.fullTime.away}</span>
+                          </>
+                        )}
+                      </div>
+                      {match.status === 'SCHEDULED' && (
+                        <div className="mt-1 text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-roboto">
+                          {new Date(match.utcDate).toLocaleDateString()}
                         </div>
                       )}
                     </div>
-                  </div>
-                  <div className="flex items-center font-anton justify-end space-x-2 sm:space-x-4" style={{ flexBasis: '35%' }}>
-                    <span className="text-sm sm:text-lg text-white">{match.awayTeam.name}</span>
-                    <img src={match.awayTeam.crest} alt={match.awayTeam.name} className="w-8 h-8 sm:w-10 sm:h-10" />
+
+                    {/* Away */}
+                    <div className="flex items-center justify-end gap-2 min-w-0">
+                      <span className="font-anton text-sm sm:text-base text-gray-900 dark:text-white truncate text-right" title={match.awayTeam.name}>
+                        <span className="sm:hidden">{match.awayTeam.short || match.awayTeam.name}</span>
+                        <span className="hidden sm:inline">{match.awayTeam.name}</span>
+                      </span>
+                      <span className="inline-flex items-center justify-center rounded-lg ring-1 ring-black/10 dark:ring-white/10 overflow-hidden bg-transparent">
+                        {match.awayTeam.crest && (
+                          <img src={match.awayTeam.crest} alt={match.awayTeam.name} className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
+                        )}
+                      </span>
+                    </div>
                   </div>
                 </motion.li>
               ))}
@@ -204,7 +269,7 @@ const MainMatchResult = () => {
           </div>
         ))
       ) : (
-        <div className="text-center text-gray-500">No matches found</div>
+        <div className="text-center text-gray-600 dark:text-gray-400">No matches found</div>
       )}
     </div>
   );

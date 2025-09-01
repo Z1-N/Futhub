@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title>FutHub</title>
+  <desc>Soccer ball on a gradient shield</desc>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#9333ea"/>
+    </linearGradient>
+  </defs>
+  <!-- Gradient rounded square background -->
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="url(#g)"/>
+
+  <!-- Minimal soccer ball -->
+  <g transform="translate(32,32)">
+    <circle r="18" fill="#ffffff"/>
+    <!-- seams -->
+    <path d="M -12 -2 Q 0 -6 12 -2" fill="none" stroke="#111827" stroke-opacity="0.25" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M -14 4 Q 0 0 14 4" fill="none" stroke="#111827" stroke-opacity="0.22" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M -6 -10 Q 0 -2 6 -10" fill="none" stroke="#111827" stroke-opacity="0.22" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- center pentagon hint -->
+    <path d="M 0 -5 L 4 -2 L 3 3 L -3 3 L -4 -2 Z" fill="#111827" fill-opacity="0.15"/>
+  </g>
+
+  <!-- subtle border for crisp edges -->
+  <rect x="4.5" y="4.5" width="55" height="55" rx="13.5" fill="none" stroke="#ffffff" stroke-opacity="0.15"/>
+</svg>

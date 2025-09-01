@@ -9,29 +9,23 @@ const RightAside = () => {
     const fetchNews = async () => {
       const options = {
         method: 'GET',
-        url: 'https://api.currentsapi.services/v1/latest-news',
-        params: {
-          category : 'sports',
-          author : 'bbc-sport, espn, football-italia, four-four-two, fox-sports, google-news, talksport, the-sport-bible, the-telegraph, the-times, the-verge, the-wall-street-journal, the-washington-post, time',
-          language: 'en',
-          keywords: 'soccer, football, Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Champions League, Europa League, UEFA, FIFA, Transfer News, Player Transfers, Football Players, Football Matches, Football Results, Football Highlights, Football News, Football Rumors, Football Injuries, Football Managers, Football Clubs',
-          apiKey: '3DMRmLiB2jUVat5OJ_iKOxnXxYmzxYh8t4NSQ_TeApYHX9_4' // Replace with your actual API key
-        }
+        url: '/api/espn/soccer/eng.1/news',
       };
 
       try {
         const response = await axios.request(options);
         const today = new Date();
-        const threeDaysAgo = new Date(today);
-        threeDaysAgo.setDate(today.getDate() - 2); // Get the date 3 days ago
-
-        const articlesWithImages = response.data.news
+        const twoDaysAgo = new Date(today);
+        twoDaysAgo.setDate(today.getDate() - 2);
+        const articles = response.data?.articles || [];
+        const withImagesRecent = articles
+          .filter(article => article?.images?.[0]?.url)
           .filter(article => {
-            const articleDate = new Date(article.published);
-            return article.image && articleDate >= threeDaysAgo && articleDate <= today;
-          }) // Filter for articles with images published in the past 3 days
-          .slice(0, 10); // Limit to 10 articles
-        setNews(articlesWithImages);
+            const published = article?.published || article?.lastModified;
+            return published ? new Date(published) >= twoDaysAgo : true;
+          })
+          .slice(0, 10);
+        setNews(withImagesRecent);
       } catch (error) {
         console.error('Error fetching news:', error.message);
       }
@@ -41,34 +35,38 @@ const RightAside = () => {
   }, []);
 
   return (
-    <div className="bg-gray-800 m-8 text-white p-4 rounded-lg shadow-lg w-full md:w-64">
-      <h2 className="text-2xl font-anton mb-4">Latest News</h2>
-      <ul>
-        {news.map((article, index) => (
-          <motion.li
-            key={index}
-            className="mb-4 p-4 bg-gray-700 rounded-lg hover:bg-gray-600 font-roboto cursor-pointer"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <a href={article.url} target="_blank" rel="noopener noreferrer" className="block">
-              {article.image && (
-                <img src={article.image} alt={article.title} className="w-full h-32 object-cover rounded-lg mb-2" />
-              )}
-              <h3 className="text-lg font-semibold">{article.title}</h3>
-              <p className="text-sm font-roboto text-gray-400">
-                {article.description ? `${article.description.slice(0, 100)}...` : ''}
-              </p>
-              <div className="text-blue-400 hover:underline flex items-center mt-2">
-                <span>Read more</span>
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </div>
-            </a>
-          </motion.li>
-        ))}
-      </ul>
+    <div className="m-4 md:m-0 w-full">
+      <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/70 backdrop-blur p-4 md:p-4 lg:p-5 shadow-sm text-gray-900 dark:text-white">
+        <h2 className="text-lg md:text-xl font-anton mb-3">Latest News</h2>
+        <ul>
+          {news.map((article, index) => (
+            <motion.li
+              key={index}
+              className="mb-4"
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+            >
+              <a href={article.links?.web?.href || article?.link} target="_blank" rel="noopener noreferrer" className="block rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/60 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                {article?.images?.[0]?.url && (
+                  <img src={article.images[0].url} alt={article.headline} className="w-full h-28 object-cover" />
+                )}
+                <div className="p-2.5">
+                  <h3 className="text-xs md:text-sm font-semibold leading-snug line-clamp-2">{article.headline || article.title}</h3>
+                  <p className="text-[11px] md:text-xs font-roboto text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                    {article.description ? `${article.description.slice(0, 100)}...` : ''}
+                  </p>
+                  <div className="text-blue-600 dark:text-blue-400 hover:underline flex items-center mt-1.5 text-[11px] md:text-xs">
+                    <span>Read more</span>
+                    <svg className="w-3.5 h-3.5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+              </a>
+            </motion.li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };
