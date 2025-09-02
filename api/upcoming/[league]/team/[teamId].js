@@ -42,7 +42,7 @@ export default async function handler(req, res) {
       }
     }
     matches.sort((a,b) => new Date(a.date) - new Date(b.date));
-    res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=300');
+  res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60');
     res.status(200).json({ league, teamId, days, updatedAt: Date.now(), matches });
   } catch (e) {
     res.status(502).json({ error: 'Failed to load team upcoming', details: e.message });

@@ -124,6 +124,6 @@ export default async function handler(req, res) {
     performance = { last5: last5.map(m => m.result).join(''), points: pts, gf, ga, gd: gf - ga, winRate: Math.round((wins / last5.length) * 100) };
   }
 
-  res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=300');
+  res.setHeader('Cache-Control', 'no-store');
   res.status(200).json({ team: teamInfo, recent, upcoming, performance });
 }

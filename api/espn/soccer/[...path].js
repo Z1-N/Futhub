@@ -9,7 +9,10 @@ export default async function handler(req, res) {
       headers: { 'Accept': 'application/json', 'User-Agent': 'Futhub/1.0 (+espn-proxy)' },
     });
     const body = await upstream.text();
-    res.status(upstream.status).setHeader('Content-Type', upstream.headers.get('content-type') || 'application/json').send(body);
+    res.setHeader('Cache-Control', 'no-store');
+    res.status(upstream.status)
+      .setHeader('Content-Type', upstream.headers.get('content-type') || 'application/json')
+      .send(body);
   } catch (e) {
     res.status(502).json({ error: 'Bad gateway', details: e.message });
   }
