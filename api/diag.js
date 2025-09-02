@@ -1,7 +1,7 @@
 export default async function handler(_req, res) {
   const out = { now: Date.now(), upstreams: {} };
   try {
-    const r1 = await fetch('http://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard', { headers: { 'Accept': 'application/json' } });
+    const r1 = await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard', { headers: { 'Accept': 'application/json' } });
     out.upstreams.espnSite = { ok: r1.ok, status: r1.status };
   } catch (e) { out.upstreams.espnSite = { ok: false, error: e.message }; }
   try {

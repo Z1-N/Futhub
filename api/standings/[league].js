@@ -53,7 +53,7 @@ export default async function handler(req, res) {
     if (!r.ok) return res.status(r.status).json({ error: 'upstream error' });
     const json = await r.json();
     const data = normalizeStandings(json);
-  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
+  res.setHeader('Cache-Control', 'no-store');
     res.status(200).json({ league, updatedAt: Date.now(), entries: data.entries, stale: false });
   } catch (e) {
     res.status(502).json({ error: 'Failed to load standings', details: e.message });

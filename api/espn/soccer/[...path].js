@@ -3,7 +3,7 @@ export default async function handler(req, res) {
   const qs = new URLSearchParams(req.query);
   qs.delete('path');
   const suffix = Array.isArray(path) ? path.join('/') : String(path || '');
-  const url = `http://site.api.espn.com/apis/site/v2/sports/soccer/${suffix}${qs.toString() ? `?${qs}` : ''}`;
+  const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${suffix}${qs.toString() ? `?${qs}` : ''}`;
   try {
     const upstream = await fetch(url, {
       headers: { 'Accept': 'application/json', 'User-Agent': 'Futhub/1.0 (+espn-proxy)' },

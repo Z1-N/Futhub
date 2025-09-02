@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     for (let i = 0; i < days; i++) {
       const dt = new Date(start);
       dt.setDate(start.getDate() + i);
-      const url = `http://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard?dates=${fmt(dt)}`;
+  const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard?dates=${fmt(dt)}`;
       fetches.push(fetch(url, { headers }).then(r => (r.ok ? r.json() : null)).catch(() => null));
     }
     const jsons = await Promise.all(fetches);

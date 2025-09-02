@@ -43,7 +43,7 @@ export default async function handler(req, res) {
   let recent = [];
   let teamInfo = null;
   try {
-    const rootUrl = `http://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard`;
+  const rootUrl = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard`;
     const rootRes = await fetch(rootUrl, { headers });
     if (rootRes.ok) {
       const rootJson = await rootRes.json();
@@ -54,7 +54,7 @@ export default async function handler(req, res) {
         .filter((d) => d instanceof Date && !isNaN(d) && d <= today)
         .sort((a,b) => b - a);
       for (const dt of pastDays) {
-        const url = `http://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard?dates=${fmt(dt)}`;
+  const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard?dates=${fmt(dt)}`;
         // eslint-disable-next-line no-await-in-loop
         const data = await fetch(url, { headers }).then(r => (r.ok ? r.json() : null)).catch(() => null);
         const events = data?.events || [];
@@ -85,7 +85,7 @@ export default async function handler(req, res) {
     for (let i = 0; i < 14; i++) {
       const dt = new Date(start);
       dt.setDate(start.getDate() + i);
-      const url = `http://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard?dates=${fmt(dt)}`;
+  const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard?dates=${fmt(dt)}`;
       fetches.push(fetch(url, { headers }).then(r => (r.ok ? r.json() : null)).catch(() => null));
     }
     const jsons = await Promise.all(fetches);
