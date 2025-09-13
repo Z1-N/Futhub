@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { ESPN_SITE_BASE, fetchJSON } from '../utils/espn';
 import { motion } from 'framer-motion';
 
 const RightAside = () => {
@@ -7,17 +7,12 @@ const RightAside = () => {
 
   useEffect(() => {
     const fetchNews = async () => {
-      const options = {
-        method: 'GET',
-        url: '/api/espn/soccer/eng.1/news',
-      };
-
       try {
-        const response = await axios.request(options);
+  const response = await fetchJSON(`${ESPN_SITE_BASE}/eng.1/news`);
         const today = new Date();
         const twoDaysAgo = new Date(today);
         twoDaysAgo.setDate(today.getDate() - 2);
-        const articles = response.data?.articles || [];
+  const articles = response?.articles || [];
         const withImagesRecent = articles
           .filter(article => article?.images?.[0]?.url)
           .filter(article => {

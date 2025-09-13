@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { ESPN_SITE_BASE, fetchJSON, yyyymmdd } from '../utils/espn';
 import PropTypes from 'prop-types';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -16,10 +16,24 @@ export default function TeamUpcoming({ leagueCode, team, onClose }) {
       setLoading(true);
       setError('');
       try {
-        const { data } = await axios.get(`/api/upcoming/${leagueCode}/team/${team.id}?days=14`, { signal: controller.signal });
-        setMatches(data.matches || []);
+        const days = [...Array(14)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() + i); return d; });
+  const jsons = await Promise.all(days.map(d => fetchJSON(`${ESPN_SITE_BASE}/${leagueCode}/scoreboard?dates=${yyyymmdd(d)}`, { signal: controller.signal }).catch(()=>null)));
+        const out = [];
+        for (const data of jsons) {
+          const events = data?.events || [];
+          for (const ev of events) {
+            const comp = ev.competitions?.[0];
+            const comps = comp?.competitors || [];
+            if (!comps.some(c => c?.team?.id === String(team.id))) continue;
+            const status = ev.status?.type?.state;
+            if (status !== 'pre') continue;
+            const [home, away] = comps.sort((a,b)=> (a.homeAway === 'home' ? -1 : 1));
+            out.push({ id: ev.id, date: ev.date, home: { name: home?.team?.displayName || home?.team?.name, logo: home?.team?.logo }, away: { name: away?.team?.displayName || away?.team?.name, logo: away?.team?.logo } });
+          }
+        }
+        setMatches(out);
       } catch (e) {
-        if (!axios.isCancel(e)) setError('Failed to load team fixtures');
+        if (e?.name !== 'AbortError') setError('Failed to load team fixtures');
       } finally {
         setLoading(false);
       }

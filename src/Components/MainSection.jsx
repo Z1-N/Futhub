@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { ESPN_SITE_BASE, fetchJSON, yyyymmdd } from '../utils/espn';
 import { motion } from 'framer-motion';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -22,42 +22,19 @@ const leagues = [
   { code: 'fra.1', name: 'Ligue 1', crestId: 'FL1' },
 ];
 // ESPN proxy base
-const espnBase = '/api/espn/soccer';
+const espnBase = ESPN_SITE_BASE;
+
 
 const MainMatchResult = () => {
   const [leagueMatches, setLeagueMatches] = useState({});
   const [loading, setLoading] = useState(true);
 
-  const fetchMatchesWithRetry = async (options, retries = 3, delay = 1000) => {
-    const controller = new AbortController();
-    const { signal } = controller;
-    try {
-      for (let attempt = 1; attempt <= retries; attempt++) {
-        try {
-          const response = await axios.request({ ...options, signal });
-          return response.data;
-        } catch (error) {
-          if (axios.isCancel(error)) {
-            throw new Error('Request cancelled');
-          }
-          if (attempt === retries) {
-            throw error;
-          }
-          await new Promise((resolve) => setTimeout(resolve, delay * attempt));
-        }
-      }
-    } finally {
-      controller.abort();
-    }
-  };
-
   const fetchLeagueMatches = async (league, isMounted) => {
-    // ESPN scoreboard provides events with competitors and status
-    const url = `${espnBase}/${league.code}/scoreboard`;
-    const options = { method: 'GET', url };
+  // ESPN scoreboard provides events with competitors and status
+  const url = `${espnBase}/${league.code}/scoreboard?dates=${yyyymmdd()}`;
 
     try {
-      const data = await fetchMatchesWithRetry(options);
+      const data = await fetchJSON(url);
       const events = data?.events || [];
 
   const filteredMatches = events.map((ev) => {

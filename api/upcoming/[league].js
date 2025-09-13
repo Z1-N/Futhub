@@ -42,7 +42,7 @@ export default async function handler(req, res) {
       }
     }
     matches.sort((a,b) => new Date(a.date) - new Date(b.date));
-  res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
     res.status(200).json({ league, days, updatedAt: Date.now(), matches });
   } catch (e) {
     res.status(502).json({ error: 'Failed to load upcoming', details: e.message });

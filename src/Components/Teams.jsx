@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { ESPN_SITE_BASE, fetchJSON } from '../utils/espn';
 import PropTypes from 'prop-types';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -14,7 +14,7 @@ const leagueMap = [
   { id: 'CL', code: 'uefa.champions', name: 'Champions League' },
 ];
 
-const espnBase = '/api/espn/soccer';
+const espnBase = ESPN_SITE_BASE;
 
 export default function Teams({ leagueId }) {
   const navigate = useNavigate();
@@ -34,8 +34,8 @@ export default function Teams({ leagueId }) {
     setError('');
     setTeams(null); // reset to trigger skeleton
     try {
-      const { data } = await axios.get(`${espnBase}/${league.code}/teams`, { signal });
-      const nodes = data?.sports?.[0]?.leagues?.[0]?.teams || [];
+  const data = await fetchJSON(`${espnBase}/${league.code}/teams`, { signal });
+  const nodes = data?.sports?.[0]?.leagues?.[0]?.teams || [];
       const mapped = nodes.map((t) => ({
         id: t?.team?.id,
         name: t?.team?.displayName || t?.team?.name,
@@ -47,7 +47,7 @@ export default function Teams({ leagueId }) {
       }));
       setTeams(mapped);
     } catch (e) {
-      if (!axios.isCancel(e)) setError('Failed to load teams');
+      if (e?.name !== 'AbortError') setError('Failed to load teams');
     } finally {
       setLoading(false);
     }

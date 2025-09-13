@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
+import { ESPN_SITE_BASE, fetchJSON } from '../utils/espn';
 
 const News = () => {
   const [news, setNews] = useState([]);
@@ -9,20 +9,36 @@ const News = () => {
   useEffect(() => {
     const fetchNews = async () => {
       // Default league: Premier League (eng.1)
-      const url = '/api/espn/soccer/eng.1/news';
-      const options = { method: 'GET', url };
-
+  const primary = `${ESPN_SITE_BASE}/eng.1/news`;
+  const fallback = `${ESPN_SITE_BASE}/news`;
       try {
-        const response = await axios.request(options);
-        const articles = response.data?.articles || [];
-        const articlesWithImages = articles
-          .filter(article => article?.images?.[0]?.url)
-          .slice(0, 30);
+  const data1 = await fetchJSON(primary);
+        let items = [];
+        if (Array.isArray(data1.articles)) items = data1.articles;
+        else if (Array.isArray(data1.headlines)) items = data1.headlines;
+        else if (Array.isArray(data1.feed)) items = data1.feed;
+        else if (Array.isArray(data1.items)) items = data1.items;
 
-        setNews(articlesWithImages);
-        setLoading(false);
+        if (!items.length) {
+          const data2 = await fetchJSON(fallback);
+          if (Array.isArray(data2.articles)) items = data2.articles;
+          else if (Array.isArray(data2.headlines)) items = data2.headlines;
+          else if (Array.isArray(data2.feed)) items = data2.feed;
+          else if (Array.isArray(data2.items)) items = data2.items;
+        }
+
+        const normalized = (items || []).map((it) => ({
+          headline: it.headline || it.title || it?.text || '',
+          description: it.description || it?.summary || '',
+          links: it.links || { web: { href: it?.link || it?.url } },
+          images: it.images || (it?.images?.length ? it.images : (it?.image ? [{ url: it.image?.url || it.image }] : [])),
+        }));
+
+        const withImages = normalized.filter(a => a?.images?.[0]?.url).slice(0, 30);
+        setNews(withImages);
       } catch (error) {
         console.error('Error fetching news:', error.message);
+      } finally {
         setLoading(false);
       }
     };

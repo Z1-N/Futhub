@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { ESPN_SITE_BASE, fetchJSON, yyyymmdd } from '../utils/espn';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
@@ -23,10 +23,54 @@ export default function TeamPage() {
   // reset lists to show skeletons while fetching
   setData({ team: null, recent: null, upcoming: null, performance: null });
       try {
-        const { data } = await axios.get(`/api/team/${leagueCode}/${teamId}?recent=5&upcoming=5`, { signal: controller.signal });
-        setData(data);
+        // Minimal client-side recreation of recent/upcoming using ESPN scoreboard
+        const today = new Date();
+        const days = [...Array(14)].map((_, i) => { const d = new Date(today); d.setDate(today.getDate() - i); return d; });
+        const futDays = [...Array(14)].map((_, i) => { const d = new Date(today); d.setDate(today.getDate() + i); return d; });
+  const pastJsons = await Promise.all(days.map(d => fetchJSON(`${ESPN_SITE_BASE}/${leagueCode}/scoreboard?dates=${yyyymmdd(d)}`, { signal: controller.signal }).catch(()=>null)));
+  const futJsons = await Promise.all(futDays.map(d => fetchJSON(`${ESPN_SITE_BASE}/${leagueCode}/scoreboard?dates=${yyyymmdd(d)}`, { signal: controller.signal }).catch(()=>null)));
+        const toMatch = (ev) => {
+          const comp = ev.competitions?.[0];
+          const [home, away] = (comp?.competitors || []).sort((a,b)=> (a.homeAway === 'home' ? -1 : 1));
+          const isHome = home?.team?.id === teamId;
+          const self = isHome ? home : away;
+          const opp = isHome ? away : home;
+          const status = ev.status?.type?.state;
+          const score = status !== 'pre' ? `${home?.score ?? 0}-${away?.score ?? 0}` : null;
+          let result = 'U';
+          if (status === 'post') {
+            const hs = Number(home?.score ?? 0), as = Number(away?.score ?? 0);
+            if (isHome ? hs > as : as > hs) result = 'W';
+            else if (hs === as) result = 'D'; else result = 'L';
+          }
+          return { id: ev.id, date: ev.date, status: status === 'pre' ? 'SCHEDULED' : (status === 'in' ? 'LIVE' : 'FINISHED'), home: { id: home?.team?.id, name: home?.team?.displayName || home?.team?.name, logo: home?.team?.logo }, away: { id: away?.team?.id, name: away?.team?.displayName || away?.team?.name, logo: away?.team?.logo }, isHome, score, result };
+        };
+        const filterByTeam = (arr) => (arr?.events || []).filter(ev => (ev.competitions?.[0]?.competitors || []).some(c => c?.team?.id === teamId));
+        const recentEvents = pastJsons.flatMap(j => filterByTeam(j)).filter(ev => ev.status?.type?.state === 'post').slice(0, 5);
+        const upcomingEvents = futJsons.flatMap(j => filterByTeam(j)).filter(ev => ev.status?.type?.state === 'pre').slice(0, 5);
+        const recent = recentEvents.map(toMatch);
+        const upcoming = upcomingEvents.map(toMatch);
+        let teamInfo = null;
+        const sample = recent[0] || upcoming[0];
+        if (sample) {
+          const t = sample.isHome ? sample.home : sample.away;
+          teamInfo = { id: t.id, name: t.name, logo: t.logo };
+        }
+        // Performance over last 5
+        let performance = { last5: '', points: 0, gf: 0, ga: 0, gd: 0, winRate: 0 };
+        if (recent.length) {
+          const last5 = recent.slice(0, 5);
+          let pts = 0, gf = 0, ga = 0, wins = 0;
+          for (const m of last5) {
+            const [hs, as] = (m.score || '0-0').split('-').map((n) => Number(n) || 0);
+            gf += m.isHome ? hs : as; ga += m.isHome ? as : hs;
+            if (m.result === 'W') { pts += 3; wins += 1; } else if (m.result === 'D') { pts += 1; }
+          }
+          performance = { last5: last5.map(m => m.result).join(''), points: pts, gf, ga, gd: gf - ga, winRate: Math.round((wins / last5.length) * 100) };
+        }
+        setData({ team: teamInfo, recent, upcoming, performance });
       } catch (e) {
-        if (!axios.isCancel(e)) setError('Failed to load team data');
+        if (e?.name !== 'AbortError') setError('Failed to load team data');
       } finally { setLoading(false); }
     })();
     return () => controller.abort();

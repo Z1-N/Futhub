@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import axios from 'axios';
+import { ESPN_SITE_BASE, fetchJSON } from '../utils/espn';
 import PropTypes from 'prop-types';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -32,9 +32,9 @@ export default function LeagueUpcoming({ leagueId, onTeamClick }) {
     try {
       // Fetch exact date from ESPN scoreboard and map
       const yyyymmdd = (selectedDate || new Date().toISOString().slice(0,10)).replace(/-/g, '');
-      const resp = await axios.get(`/api/espn/soccer/${code}/scoreboard?dates=${yyyymmdd}`, { signal });
-      const events = resp.data?.events || [];
-      const mapped = events
+  const resp = await fetchJSON(`${ESPN_SITE_BASE}/${code}/scoreboard?dates=${yyyymmdd}`, { signal });
+  const events = resp?.events || [];
+  const mapped = events
         .map((ev) => {
           const [home, away] = ev.competitions?.[0]?.competitors?.sort((a,b)=> (a.homeAway === 'home' ? -1 : 1)) || [];
           const state = ev.status?.type?.state; // 'pre','in','post'
@@ -49,7 +49,7 @@ export default function LeagueUpcoming({ leagueId, onTeamClick }) {
         .filter(m => m.status === 'SCHEDULED'); // Upcoming-only
       setMatches(mapped);
     } catch (e) {
-      if (!axios.isCancel(e)) setError('Failed to load upcoming matches');
+      if (e?.name !== 'AbortError') setError('Failed to load upcoming matches');
     } finally {
       setLoading(false);
     }

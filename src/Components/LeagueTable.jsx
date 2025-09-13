@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import axios from 'axios';
+import { ESPN_WEB_BASE, fetchJSON } from '../utils/espn';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
-// Cached normalized standings endpoint
-const cachedStandingsBase = '/api/standings';
+// Direct ESPN web standings endpoint
+const standingsBase = ESPN_WEB_BASE;
 
 const leagueColors = {
   'PL': 'from-purple-600 to-indigo-600',
@@ -60,13 +60,38 @@ const LeagueTable = ({ leagueId, onLeagueChange }) => {
       // Use cached normalized standings API
       const leagueCode = leaguesList.find(l => l.id === currentLeagueId)?.code;
       if (!leagueCode) return;
-      const options = { method: 'GET', url: `${cachedStandingsBase}/${leagueCode}` };
+  const url = `${standingsBase}/${leagueCode}/standings`;
 
       try {
-        const response = await axios.request(options);
-        const entries = response.data?.entries || [];
-        setUpdatedAt(response.data?.updatedAt || null);
-        setStale(Boolean(response.data?.stale));
+        const resp = await fetchJSON(url);
+        const children = Array.isArray(resp.children) ? resp.children : (resp.standings ? [resp] : []);
+        const entriesRaw = children.flatMap(g => g?.standings?.entries || g?.entries || []);
+        const entries = (entriesRaw.length ? entriesRaw : resp?.standings?.entries || []).map((e, idx) => {
+          const team = e.team || e?.teamRecord?.team || {};
+          const statsArr = e.stats || e.team?.record?.items?.[0]?.stats || [];
+          const stats = {};
+          for (const s of statsArr || []) { if (s && typeof s === 'object') stats[s.name] = s.value; }
+          const wins = Number.isFinite(stats.wins) ? stats.wins : null;
+          const draws = Number.isFinite(stats.ties) ? stats.ties : (Number.isFinite(stats.draws) ? stats.draws : null);
+          const gf = Number.isFinite(stats.goalsFor) ? stats.goalsFor : (Number.isFinite(stats.pointsFor) ? stats.pointsFor : null);
+          const ga = Number.isFinite(stats.goalsAgainst) ? stats.goalsAgainst : (Number.isFinite(stats.pointsAgainst) ? stats.pointsAgainst : null);
+          const computedPts = (Number.isFinite(wins) && Number.isFinite(draws)) ? (wins * 3 + draws) : null;
+          const computedGD = (Number.isFinite(gf) && Number.isFinite(ga)) ? (gf - ga) : null;
+          return {
+            rank: e.rank || stats.rank || idx + 1,
+            team: { id: team.id, name: team.displayName || team.name, logo: team.logos?.[0]?.href || team.logo || '' },
+            P: stats.gamesPlayed ?? stats.played ?? null,
+            W: wins,
+            D: draws,
+            L: stats.losses ?? null,
+            GF: gf,
+            GA: ga,
+            GD: stats.goalDifferential ?? stats.pointDifferential ?? computedGD,
+            Pts: stats.points ?? stats.totalPoints ?? computedPts,
+          };
+        });
+        setUpdatedAt(Date.now());
+        setStale(false);
         const mapped = entries.map((row) => ({
           position: row.rank ?? '-',
           team: { id: row.team?.id, name: row.team?.name, crest: row.team?.logo },

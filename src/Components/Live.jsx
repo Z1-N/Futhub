@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import axios from 'axios';
+import { ESPN_SITE_BASE, fetchJSON, yyyymmdd } from '../utils/espn';
 import PropTypes from 'prop-types';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -15,7 +15,7 @@ const leagueMap = [
   { id: 'CL', code: 'uefa.champions', name: 'Champions League' },
 ];
 
-const espnBase = '/api/espn/soccer';
+const espnBase = ESPN_SITE_BASE;
 
 export default function Live({ leagueId }) {
   const [selected, setSelected] = useState(leagueId || 'PL');
@@ -44,7 +44,7 @@ export default function Live({ leagueId }) {
   const fetchLive = async (signal) => {
     setError('');
     try {
-    const { data } = await axios.get(`${espnBase}/${league.code}/scoreboard`, { signal });
+  const data = await fetchJSON(`${espnBase}/${league.code}/scoreboard?dates=${yyyymmdd()}`, { signal });
       const live = (data?.events || []).filter((ev) => ev?.status?.type?.state === 'in').map((ev) => {
         const [home, away] = ev.competitions?.[0]?.competitors?.sort((a,b)=> (a.homeAway === 'home' ? -1 : 1)) || [];
         return {
@@ -57,7 +57,7 @@ export default function Live({ leagueId }) {
       });
       setEvents(live);
     } catch (e) {
-      if (!axios.isCancel(e)) setError('Failed to load live scores');
+      if (e?.name !== 'AbortError') setError('Failed to load live scores');
     } finally {
       setLoading(false);
     }
